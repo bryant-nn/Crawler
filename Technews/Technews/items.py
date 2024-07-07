@@ -14,3 +14,4 @@ class TechnewsItem(scrapy.Item):
     content = scrapy.Field()
     time = scrapy.Field()
     author = scrapy.Field()
+    class_ = scrapy.Field()

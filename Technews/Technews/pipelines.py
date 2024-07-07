@@ -38,11 +38,18 @@ class TechnewsPipeline:
         self.workbook = Workbook()
         self.sheet = self.workbook.active
         self.sheet.title = 'Technews'
-        self.sheet.append(['Title', 'URL', 'Time', 'Author', 'Content'])
-        self.seen_urls = set()
+        self.sheet.append(['Title', 'URL', 'Time', 'Class', 'Author', 'Content'])
+
+        with open('seen_urls.txt', 'r') as file:
+            self.seen_urls = set(file.read().splitlines())
+
+        # self.seen_urls = set()
 
     def close_spider(self, spider):
-        self.workbook.save('technews.xlsx')
+        self.workbook.save('technews_semiconductor.xlsx')
+        with open('seen_urls.txt', 'w') as file:
+            for url in self.seen_urls:
+                file.write(url + '\n')
 
     def process_item(self, item, spider):
         if item['url'] in self.seen_urls:
@@ -52,6 +59,6 @@ class TechnewsPipeline:
         else:
             # Add the URL to the seen set and write the item to XLSX
             self.seen_urls.add(item['url'])
-            self.sheet.append([item['title'], item['url'], item['time'], item['author'], item['content']])
+            self.sheet.append([item['title'], item['url'], item['time'], item['class_'], item['author'], item['content']])
             return item
 

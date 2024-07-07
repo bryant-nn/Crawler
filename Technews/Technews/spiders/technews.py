@@ -26,13 +26,14 @@ class TechnewsSpider(scrapy.Spider):
 
     def __init__(self):
         self.start_page_number = 0
-        self.end_page_number = 1433
+        self.end_page_number = 1433 #1433
+        self.class_ = 'semiconductor'
     # /html/body/div[2]/div/div[1]/div/div/div/div/div/div/div[5]/div[2]/div/div/div[2]/div/div[1]
     # 
     def start_requests(self):
         for page_number in range(self.start_page_number, self.end_page_number + 1):
         # for keyword in self.keywords:
-            url = f'https://technews.tw/category/semiconductor/page/{page_number}/'
+            url = f'https://technews.tw/category/{self.class_}/page/{page_number}/'
             # url = f'https://technews.tw/google-search/?googlekeyword={keyword}'
             yield scrapy.Request(url=url, callback=self.parse)
             # yield SeleniumRequest(url=url, callback=self.parse)
@@ -61,7 +62,7 @@ class TechnewsSpider(scrapy.Spider):
             print(f'Title: {title}, URL: {url}, Time: {time}')
             
             # Create an item and follow the URL to parse the content
-            item = TechnewsItem(title=title, url=url, time=time)
+            item = TechnewsItem(title=title, url=url, time=time, class_=self.class_)
             request = scrapy.Request(url=url, callback=self.parse_content)
             request.meta['item'] = item
             yield request
@@ -78,7 +79,9 @@ class TechnewsSpider(scrapy.Spider):
         # # paragraphs = paragraphs[:-1]
         # content = ' '.join(paragraphs)
         # author = /html/body/div[2]/div/div[1]/div/article/div/header/table/tbody/tr[2]/td/span[2]/a
-        author = response.xpath('/html/body/div[2]/div/div[1]/div/article/div/header/table/tbody/tr[2]/td/span[2]/a/text()').get()
+        # author = /html/body/div[2]/div/div[1]/div/article/div/header/table/tbody/tr[2]/td/span[2]/a
+
+        author = response.xpath('//header//table//tr[2]//td//span[2]//a/text()').get()
 
         paragraphs = response.xpath('//div[@class="indent"]//p')
 
@@ -88,7 +91,7 @@ class TechnewsSpider(scrapy.Spider):
         # 去掉最後一個 <p> 標籤的內容
         if content_list:
             content_list = content_list[:-1]
-        content = ' '.join(content_list)
+        content = '\n'.join(content_list)
 
         item['author'] = author
         item['content'] = content
